@@ -99,7 +99,7 @@ impl<T: Copy> queue::Queue<T> for RingBuffer<'_, T> {
                      if full(old) {
                          old == new
                      } else {
-                         new.ring_len == old.ring_len && new.hd == next_hd(old)
+                         new.ring_len == old.ring_len && new.hd == old.hd
                          && new.tl == next_tl(old)
                      }
                    }
