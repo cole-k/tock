@@ -24,6 +24,7 @@ flux_rs::defs! {
     fn full(rb: RingBuffer) -> bool { rb.hd == next_index(rb.tl, rb.ring_len) }
     fn next_hd(rb: RingBuffer) -> int { next_index(rb.hd, rb.ring_len) }
     fn next_tl(rb: RingBuffer) -> int { next_index(rb.tl, rb.ring_len) }
+    fn len(rb: RingBuffer) -> int { (rb.tl - rb.hd) % rb.ring_len }
 }
 
 impl<'a, T: Copy> RingBuffer<'a, T> {
@@ -82,7 +83,7 @@ impl<T: Copy> queue::Queue<T> for RingBuffer<'_, T> {
         self.head == ((self.tail + 1) % self.ring.len())
     }
 
-    #[flux_rs::sig(fn(self: &RingBuffer<T>[@rb]) -> usize[(rb.tl - rb.hd) % rb.ring_len])]
+    #[flux_rs::sig(fn(self: &RingBuffer<T>[@rb]) -> usize[len(rb)])]
     fn len(&self) -> usize {
         if self.tail > self.head {
             self.tail - self.head
