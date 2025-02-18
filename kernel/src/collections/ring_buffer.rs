@@ -77,7 +77,7 @@ impl<T: Copy> queue::Queue<T> for RingBuffer<'_, T> {
         self.head != self.tail
     }
 
-    //
+    #[flux_rs::sig(fn(self: &RingBuffer<T>[@rb]) -> bool{ b : full(rb) })]
     fn is_full(&self) -> bool {
         self.head == ((self.tail + 1) % self.ring.len())
     }
