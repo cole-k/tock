@@ -72,7 +72,7 @@ impl<'a, T: Copy> RingBuffer<'a, T> {
 }
 
 impl<T: Copy> queue::Queue<T> for RingBuffer<'_, T> {
-    //
+    #[flux_rs::sig(fn(self: &RingBuffer<T>[@rb]) -> bool[!empty(rb)])]
     fn has_elements(&self) -> bool {
         self.head != self.tail
     }
@@ -115,7 +115,7 @@ impl<T: Copy> queue::Queue<T> for RingBuffer<'_, T> {
         }
     }
 
-    #[flux_rs::sig(fn(self: &strg RingBuffer<T>[@old], val: T) -> Option<T>[!full(old)]
+    #[flux_rs::sig(fn(self: &strg RingBuffer<T>[@old], val: T) -> Option<T>[full(old)]
                    ensures self: RingBuffer<T>{new :
                      new.ring_len == old.ring_len && new.tl == next_tl(old)
                      && if full(old) {
