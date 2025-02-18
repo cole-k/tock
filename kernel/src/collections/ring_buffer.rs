@@ -27,7 +27,7 @@ flux_rs::defs! {
 }
 
 impl<'a, T: Copy> RingBuffer<'a, T> {
-    //
+    #[flux_rs::sig(fn(ring: {&mut[T][@len] | len > 1}) -> RingBuffer<T>[len, 0, 0])]
     pub fn new(ring: &'a mut [T]) -> RingBuffer<'a, T> {
         RingBuffer {
             head: 0,
