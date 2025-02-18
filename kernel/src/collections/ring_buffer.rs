@@ -197,7 +197,7 @@ impl<T: Copy> queue::Queue<T> for RingBuffer<'_, T> {
 
     //
     //
-    #[flux_rs::sig(fn(self: &strg Self) ensures self: Self)]
+    #[flux_rs::sig(fn(self: &strg RingBuffer<T>[@old]) ensures self: RingBuffer<T>[old.ring_len, 0, 0])]
     fn empty(&mut self) {
         self.head = 0;
         self.tail = 0;
