@@ -115,16 +115,16 @@ impl<T: Copy> queue::Queue<T> for RingBuffer<'_, T> {
         }
     }
 
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    #[flux_rs::sig(fn(self: &strg Self, _) -> Option<T> ensures self: Self)]
+    #[flux_rs::sig(fn(self: &strg RingBuffer<T>[@old], val: T) -> Option<T>[!full(old)]
+                   ensures self: RingBuffer<T>{new :
+                     new.ring_len == old.ring_len && new.tl == next_tl(old)
+                     && if full(old) {
+                         new.hd == next_hd(old)
+                     } else {
+                         new.hd == old.hd
+                     }
+                   }
+    )]
     fn push(&mut self, val: T) -> Option<T> {
         let result = if self.is_full() {
             let val = self.ring[self.head];
@@ -139,14 +139,16 @@ impl<T: Copy> queue::Queue<T> for RingBuffer<'_, T> {
         result
     }
 
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    #[flux_rs::sig(fn(self: &strg Self) -> Option<T> ensures self: Self)]
+    #[flux_rs::sig(fn(self: &strg RingBuffer<T>[@old]) -> Option<T>[!empty(old)]
+                   ensures self: RingBuffer<T>{new :
+                     if empty(old) {
+                       old == new
+                     } else {
+                       new.ring_len == old.ring_len && new.tl == old.tl
+                       && new.hd == next_hd(old)
+                     }
+                   }
+    )]
     fn dequeue(&mut self) -> Option<T> {
         if self.has_elements() {
             let val = self.ring[self.head];
