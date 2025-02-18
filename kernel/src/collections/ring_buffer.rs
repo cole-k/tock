@@ -103,7 +103,7 @@ impl<T: Copy> queue::Queue<T> for RingBuffer<'_, T> {
     //
     //
     //
-    //
+    #[flux_rs::sig(fn(self: &strg Self, _) -> bool ensures self: Self)]
     fn enqueue(&mut self, val: T) -> bool {
         if self.is_full() {
             // Incrementing tail will overwrite head
@@ -124,7 +124,7 @@ impl<T: Copy> queue::Queue<T> for RingBuffer<'_, T> {
     //
     //
     //
-    //
+    #[flux_rs::sig(fn(self: &strg Self, _) -> Option<T> ensures self: Self)]
     fn push(&mut self, val: T) -> Option<T> {
         let result = if self.is_full() {
             let val = self.ring[self.head];
@@ -146,7 +146,7 @@ impl<T: Copy> queue::Queue<T> for RingBuffer<'_, T> {
     //
     //
     //
-    //
+    #[flux_rs::sig(fn(self: &strg Self) -> Option<T> ensures self: Self)]
     fn dequeue(&mut self) -> Option<T> {
         if self.has_elements() {
             let val = self.ring[self.head];
@@ -166,7 +166,7 @@ impl<T: Copy> queue::Queue<T> for RingBuffer<'_, T> {
     /// If an element was removed, this function returns it as `Some(elem)`.
     //
     //
-    //
+    #[flux_rs::sig(fn(self: &strg Self, _) -> Option<T> ensures self: Self)]
     fn remove_first_matching<F>(&mut self, f: F) -> Option<T>
     where
         F: Fn(&T) -> bool,
@@ -195,7 +195,7 @@ impl<T: Copy> queue::Queue<T> for RingBuffer<'_, T> {
 
     //
     //
-    //
+    #[flux_rs::sig(fn(self: &strg Self) ensures self: Self)]
     fn empty(&mut self) {
         self.head = 0;
         self.tail = 0;
@@ -203,7 +203,7 @@ impl<T: Copy> queue::Queue<T> for RingBuffer<'_, T> {
 
     //
     //
-    //
+    #[flux_rs::sig(fn(self: &strg Self, _) ensures self: Self)]
     fn retain<F>(&mut self, mut f: F)
     where
         F: FnMut(&T) -> bool,
