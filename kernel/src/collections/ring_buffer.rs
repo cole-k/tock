@@ -94,16 +94,16 @@ impl<T: Copy> queue::Queue<T> for RingBuffer<'_, T> {
         }
     }
 
+    #[flux_rs::sig(fn(self: &strg RingBuffer<T>[@old], val: T) -> bool{ b: b == !full(old) }
+                   ensures self: RingBuffer<T>{new :
+                     if full(old) { old.hd == new.hd && old.tl == new.tl } else { true }
+                   }
+    )]
     //
     //
     //
     //
     //
-    //
-    //
-    //
-    //
-    #[flux_rs::sig(fn(self: &strg Self, _) -> bool ensures self: Self)]
     fn enqueue(&mut self, val: T) -> bool {
         if self.is_full() {
             // Incrementing tail will overwrite head
