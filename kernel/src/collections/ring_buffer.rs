@@ -82,7 +82,7 @@ impl<T: Copy> queue::Queue<T> for RingBuffer<'_, T> {
         self.head == ((self.tail + 1) % self.ring.len())
     }
 
-    //
+    #[flux_rs::sig(fn(self: &RingBuffer<T>[@rb]) -> usize[(rb.hd - rb.tl) % rb.ring_len])]
     fn len(&self) -> usize {
         if self.tail > self.head {
             self.tail - self.head
