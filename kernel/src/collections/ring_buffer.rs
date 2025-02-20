@@ -5,6 +5,7 @@
 //! Implementation of a ring buffer.
 
 use crate::collections::queue;
+use flux_rs::assert;
 
 
 #[flux_rs::refined_by(ring_len: int, hd: int, tl: int)]
@@ -70,6 +71,11 @@ impl<'a, T: Copy> RingBuffer<'a, T> {
             (None, None)
         }
     }
+}
+
+#[flux_rs::sig(fn (slot: usize, next_slot: usize, len: usize{len > 1}) -> bool[next_slot == ((slot + 1) % len)])]
+fn foo(slot: usize, next_slot: usize, len: usize) -> bool {
+    next_slot == ((slot + 1) % len)
 }
 
 impl<T: Copy> queue::Queue<T> for RingBuffer<'_, T> {
@@ -167,6 +173,7 @@ impl<T: Copy> queue::Queue<T> for RingBuffer<'_, T> {
     /// created by removing the element).
     ///
     /// If an element was removed, this function returns it as `Some(elem)`.
+
     #[flux_rs::sig(fn(self: &strg RingBuffer<T>[@old], _) -> Option<T>
                    ensures self: RingBuffer<T>{new : len(old) - len(new) <= 1}
     )]
@@ -184,6 +191,7 @@ impl<T: Copy> queue::Queue<T> for RingBuffer<'_, T> {
                 let mut next_slot = (slot + 1) % len;
                 // Move everything past this element forward in the ring
                 while next_slot != self.tail {
+                    assert(foo(slot, next_slot, len));
                     self.ring[slot] = self.ring[next_slot];
                     slot = next_slot;
                     next_slot = (next_slot + 1) % len;
@@ -205,7 +213,7 @@ impl<T: Copy> queue::Queue<T> for RingBuffer<'_, T> {
     }
 
     #[flux_rs::sig(fn(self: &strg RingBuffer<T>[@old], _)
-                   ensures self: RingBuffer<T>{new : len(old) <= len(new)}
+                   ensures self: RingBuffer<T>
     )]
     fn retain<F>(&mut self, mut f: F)
     where
@@ -218,6 +226,12 @@ impl<T: Copy> queue::Queue<T> for RingBuffer<'_, T> {
         let mut dst = self.head;
 
         while src != self.tail {
+            // if self.head <= self.tail {
+            //     assert(src < self.tail);
+            //     assert(dst >= self.head && dst <= self.tail);
+            // } else {
+            //     assert(dst >= self.head || dst <= self.tail);
+            // }
             if f(&self.ring[src]) {
                 // When the predicate is true, move the current element to the
                 // destination if needed, and increment the destination index.
