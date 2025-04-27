@@ -1,3 +1,4 @@
+#![flux::opts(scrape_quals = true)]
 // Licensed under the Apache License, Version 2.0 or the MIT License.
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 // Copyright Tock Contributors 2022.
@@ -26,6 +27,7 @@ flux_rs::defs! {
     fn next_hd(rb: RingBuffer) -> int { next_index(rb.hd, rb.ring_len) }
     fn next_tl(rb: RingBuffer) -> int { next_index(rb.tl, rb.ring_len) }
     fn len(rb: RingBuffer) -> int { (rb.tl - rb.hd) % rb.ring_len }
+    local qualifier ModQual(a: int, b: int, c: int) { a == (b + 1) % c }
 }
 
 impl<'a, T: Copy> RingBuffer<'a, T> {
@@ -71,11 +73,6 @@ impl<'a, T: Copy> RingBuffer<'a, T> {
             (None, None)
         }
     }
-}
-
-#[flux_rs::sig(fn (slot: usize, next_slot: usize, len: usize{len > 1}) -> bool[next_slot == ((slot + 1) % len)])]
-fn foo(slot: usize, next_slot: usize, len: usize) -> bool {
-    next_slot == ((slot + 1) % len)
 }
 
 impl<T: Copy> queue::Queue<T> for RingBuffer<'_, T> {
@@ -173,7 +170,7 @@ impl<T: Copy> queue::Queue<T> for RingBuffer<'_, T> {
     /// created by removing the element).
     ///
     /// If an element was removed, this function returns it as `Some(elem)`.
-
+    #[flux_rs::qualifiers(ModQual)]
     #[flux_rs::sig(fn(self: &strg RingBuffer<T>[@old], _) -> Option<T>
                    ensures self: RingBuffer<T>{new : len(old) - len(new) <= 1}
     )]
@@ -191,7 +188,6 @@ impl<T: Copy> queue::Queue<T> for RingBuffer<'_, T> {
                 let mut next_slot = (slot + 1) % len;
                 // Move everything past this element forward in the ring
                 while next_slot != self.tail {
-                    assert(foo(slot, next_slot, len));
                     self.ring[slot] = self.ring[next_slot];
                     slot = next_slot;
                     next_slot = (next_slot + 1) % len;
