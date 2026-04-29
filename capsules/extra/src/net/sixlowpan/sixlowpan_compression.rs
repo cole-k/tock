@@ -99,6 +99,9 @@ pub struct Context {
 /// that context 0 is always available and contains the mesh-local prefix.
 pub trait ContextStore {
     fn get_context_from_addr(&self, ip_addr: IPAddr) -> Option<Context>;
+    #[flux_rs::spec(fn(&Self, ctx_id: u8[@id]) -> Option<Context>[#is_some]
+                    ensures id == 0 => is_some
+    )]
     fn get_context_from_id(&self, ctx_id: u8) -> Option<Context>;
     fn get_context_0(&self) -> Context {
         match self.get_context_from_id(0) {
@@ -138,6 +141,9 @@ impl ContextStore for Context {
         }
     }
 
+    #[flux_rs::spec(fn(&Context, ctx_id: u8[@id]) -> Option<Context>[#is_some]
+                    ensures id == 0 => is_some
+    )]
     fn get_context_from_id(&self, ctx_id: u8) -> Option<Context> {
         if ctx_id == 0 {
             Some(*self)
@@ -155,6 +161,7 @@ impl ContextStore for Context {
     }
 }
 
+#[flux_rs::spec(fn({&[u8][@packet] | packet > 0}) -> bool)]
 pub fn is_lowpan(packet: &[u8]) -> bool {
     (packet[0] & iphc::DISPATCH[0]) == iphc::DISPATCH[0]
 }
@@ -186,6 +193,14 @@ fn nhc_to_ip6_nh(nhc: u8) -> Result<u8, ()> {
 /// compressed header bytes written into `buf`. Payload bytes and
 /// non-compressed next headers are not written, so the remaining `buf.len()
 /// - consumed` bytes must still be copied over to `buf`.
+#[flux_rs::no_panic_if(buf > 3)]
+#[flux_rs::spec(fn(_,
+                   _,
+                   MacAddress,
+                   MacAddress,
+                   &mut [u8][@buf],
+) -> Result<(usize, usize), ()>
+)]
 pub fn compress<'a>(
     ctx_store: &dyn ContextStore,
     ip6_packet: &'a IP6Packet<'a>,
@@ -290,6 +305,13 @@ pub fn compress<'a>(
     Ok((consumed, written))
 }
 
+#[flux_rs::spec(fn(_,
+                   _,
+                   &mut [u8][@buf],
+                   &mut usize[@written],
+)
+                requires buf > 1 && buf > written
+)]
 fn compress_cie(
     src_ctx: &Option<Context>,
     dst_ctx: &Option<Context>,
@@ -316,6 +338,13 @@ fn compress_cie(
     }
 }
 
+// NOTE(ck): Can get a more detailed spec if we refine IP6Header but I'm lazy.
+#[flux_rs::spec(fn(_,
+                   &mut [u8][@buf],
+                   &mut usize[@written],
+)
+                requires buf > 0 && buf > written + 4
+)]
 fn compress_tf(ip6_header: &IP6Header, buf: &mut [u8], written: &mut usize) {
     let ecn = ip6_header.get_ecn();
     let dscp = ip6_header.get_dscp();
@@ -349,6 +378,13 @@ fn compress_tf(ip6_header: &IP6Header, buf: &mut [u8], written: &mut usize) {
     buf[0] |= tf_encoding;
 }
 
+#[flux_rs::spec(fn(_,
+                   bool[@is_nhc],
+                   &mut [u8][@buf],
+                   &mut usize[@written],
+)
+                requires if is_nhc {buf > 0} else {buf > written}
+)]
 fn compress_nh(ip6_header: &IP6Header, is_nhc: bool, buf: &mut [u8], written: &mut usize) {
     if is_nhc {
         buf[0] |= iphc::NH;
@@ -358,6 +394,13 @@ fn compress_nh(ip6_header: &IP6Header, is_nhc: bool, buf: &mut [u8], written: &m
     }
 }
 
+// NOTE(ck): Can get a more detailed spec if we refine IP6Header but I'm lazy.
+#[flux_rs::spec(fn(_,
+                   &mut [u8][@buf],
+                   &mut usize[@written],
+)
+                requires buf > 0 && buf > written
+)]
 fn compress_hl(ip6_header: &IP6Header, buf: &mut [u8], written: &mut usize) {
     let hop_limit_flag = match ip6_header.hop_limit {
         1 => iphc::HLIM_1,

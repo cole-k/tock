@@ -17,9 +17,10 @@ flux-rs = { path = "/Users/andrew/research/flux/lib/flux-rs" }
 
 [package.metadata.flux]
 enabled = true
+no_panic = true
 check_overflow = "lazy"
 include = [
-    "src/net/util.rs",
+    "src/net/util.rs", "src/net/sixlowpan/sixlowpan_compression.rs"
 ]
 
 [lints]
