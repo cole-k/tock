@@ -11,16 +11,15 @@ edition.workspace = true
 [package.metadata.flux]
 enabled = true
 check_overflow = "lazy"
-no_panic = true
-include = ["src/collections/ring_buffer.rs"]
+no_panic = false
 include = ["src/hil/gpio.rs", "src/process.rs", "src/grant.rs", "src/syscall_driver.rs"]
 
 [dependencies]
 tock-registers = { path = "../libraries/tock-register-interface" }
 tock-cells = { path = "../libraries/tock-cells" }
 tock-tbf = { path = "../libraries/tock-tbf" }
-flux_support = { path = "../flux_support" }
-flux-rs = { path = "/Users/andrew/research/flux/lib/flux-rs" }
+flux_support = { workspace = true }
+flux-rs = { workspace = true }
 
 # In general, Tock discourages the use of cargo features. However for certain
 # kernel crate configuration, we have not found reasonable alternatives to

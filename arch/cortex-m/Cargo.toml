@@ -14,9 +14,9 @@ check_overflow = "lazy"
 
 [dependencies]
 kernel = { path = "../../kernel" }
-flux-rs = { path = "/Users/andrew/research/flux/lib/flux-rs" }
-flux_support = { path = "../../flux_support" }
-flux-core = { path = "/Users/andrew/research/flux/lib/flux-core" }
+flux-rs = { workspace = true }
+flux_support = { workspace = true }
+flux-core = { workspace = true }
 
 [lints]
 workspace = true

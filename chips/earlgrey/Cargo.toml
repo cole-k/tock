@@ -12,7 +12,7 @@ edition.workspace = true
 lowrisc = { path = "../lowrisc" }
 rv32i = { path = "../../arch/rv32i" }
 kernel = { path = "../../kernel" }
-flux_support = { path = "../../flux_support" }
+flux_support = { workspace = true }
 
 
 [lints]

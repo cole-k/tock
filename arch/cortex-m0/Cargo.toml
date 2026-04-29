@@ -11,7 +11,7 @@ edition.workspace = true
 [dependencies]
 kernel = { path = "../../kernel" }
 cortexm = { path = "../cortex-m" }
-flux_support = { path = "../../flux_support" }
+flux_support = { workspace = true }
 
 [lints]
 workspace = true

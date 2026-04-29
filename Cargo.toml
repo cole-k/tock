@@ -93,6 +93,7 @@ members = [
     "chips/swervolf-eh1",
     "chips/virtio",
     "kernel",
+    "flux_support",
     "libraries/enum_primitive",
     "libraries/riscv-csr",
     "libraries/tock-cells",
@@ -106,6 +107,12 @@ resolver = "2"
 version = "0.1.0"
 authors = ["Tock Project Developers <tock-dev@googlegroups.com>"]
 edition = "2021"
+
+[workspace.dependencies]
+flux-rs = { path = "/Users/andrew/research/flux/lib/flux-rs" }
+flux-core = { path = "/Users/andrew/research/flux/lib/flux-core" }
+flux-attrs = { path = "/Users/andrew/research/flux/lib/flux-attrs" }
+flux_support = { path = "flux_support" }
 
 [profile.dev]
 panic = "abort"
